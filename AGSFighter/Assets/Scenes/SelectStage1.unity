@@ -481,10 +481,34 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1397862156609400458, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_Height
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1397862156609400458, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_Center.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3760665484476127850, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5165337035887993371, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6337571603549917974, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
       propertyPath: m_ActionEvents.Array.data[23].m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1866051876}
+    - target: {fileID: 6742238473172570558, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_Height
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6742238473172570558, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
+      propertyPath: m_Center.x
+      value: 0.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8218969569416327126, guid: 063c1dcb0a5015c46855a8e8cf2c59da, type: 3}
       propertyPath: m_Name
       value: GameManager
