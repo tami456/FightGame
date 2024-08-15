@@ -27,8 +27,6 @@ public class PlayerInputSystem : MonoBehaviour
     private float rv = 0.0f;
     private float lv = 0.0f;
     private float uv = 0.0f;
-    private float ulv = 0.0f;
-    private float urv = 0.0f;
     private float dv = 0.0f;
 
     //ジャンプ
@@ -99,18 +97,6 @@ public class PlayerInputSystem : MonoBehaviour
     public float UV()
     {
         return uv;
-    }
-
-    //上方向の入力の受け渡し
-    public float URV()
-    {
-        return urv;
-    }
-
-    //上方向の入力の受け渡し
-    public float ULV()
-    {
-        return ulv;
     }
 
     //下方向の入力の受け渡し
@@ -382,8 +368,6 @@ public class PlayerInputSystem : MonoBehaviour
     //前ジャンプ
     public void OnJumpR(InputAction.CallbackContext context)
     {
-        var v = context.ReadValue<float>();
-        urv = v;
         if (!context.started)
         {
             return;
@@ -414,8 +398,6 @@ public class PlayerInputSystem : MonoBehaviour
     //後ろジャンプ
     public void OnJumpL(InputAction.CallbackContext context)
     {
-        var v = context.ReadValue<float>();
-        ulv = v;
         if (!context.started)
         {
             return;

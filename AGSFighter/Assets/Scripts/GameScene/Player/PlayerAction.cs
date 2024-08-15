@@ -287,14 +287,6 @@ public class PlayerAction : MonoBehaviour
         {
             HandleJumpInput();
         }
-        else if (playerInput.URV() == 1)
-        {
-            HandleJumpLRInput(IsJumpFront, IsJumpBack, 50f, 10f);
-        }
-        else if (playerInput.ULV() == 1)
-        {
-            HandleJumpLRInput(IsJumpBack, IsJumpFront, 50f, -10f);
-        }
         else
         {
             HandleNoInput();
@@ -329,25 +321,6 @@ public class PlayerAction : MonoBehaviour
             moveDirection.y = 50f;
             animState.SetJump(true);
         }
-    }
-
-    //ç∂è„âEè„ì¸óÕéû
-    private void HandleJumpLRInput(bool isJump1,bool isJump2,float jumpY,float jumpX)
-    {
-        playerInput.JumpFlag = true;
-        if (!anim.GetBool("Mirror"))
-        {
-            isJump1 = true;
-        }
-        else
-        {
-            isJump2 = true;
-        }
-        StartCoroutine(playerInput.Count());
-        isJump1 = true;
-        moveDirection.x = jumpX;
-        moveDirection.y = jumpY;
-        animState.SetJump(true);
     }
 
     //ñ≥ì¸óÕéû

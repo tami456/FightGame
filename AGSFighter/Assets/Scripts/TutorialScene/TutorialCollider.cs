@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class TutorialCollider : MonoBehaviour
 {
-    public enum Tutorial
+    // チュートリアルのステップを定義する列挙型
+    private enum Tutorial
     {
         MoveToTarget,
         Step,
@@ -20,39 +21,34 @@ public class TutorialCollider : MonoBehaviour
     }
 
     [SerializeField]
-    private SandBag sandbag;
-    [SerializeField]
-    public Tutorial tutorial;
+    private SandBag sandbag; // サンドバッグの参照
+    private Tutorial tutorial; // 現在のチュートリアルステップ
 
     [SerializeField]
-    private CharacterController playerController;
+    private PlayerAction player; // プレイヤー
     [SerializeField]
-    private PlayerInputSystem playerInputSystem;
+    private PlayerAction tuto; // チュートリアル用の敵
+
     [SerializeField]
-    private PlayerAction player;
+    private List<GameObject> targetObj = new List<GameObject>(); // 目標オブジェクトのリスト
     [SerializeField]
-    private PlayerAction tuto;
+    private List<GameObject> targetText = new List<GameObject>(); // 目標テキストのリスト
     [SerializeField]
-    private List<GameObject> targetObj = new List<GameObject>();
+    private List<Transform> targetsPos = new List<Transform>(); // 目標位置のリスト
+    private int currentIndex = 0; // 現在の目標インデックス
+
     [SerializeField]
-    private List<GameObject> targetText = new List<GameObject>();
-    [SerializeField]
-    private List<Transform> targetsPos = new List<Transform>();
-    [SerializeField]
-    private int currentIndex = 0;
-    bool t = false;
-    [SerializeField]
-    private Animator anim;
-    private bool isJump = false;
+    private Animator anim; // アニメーター
+    private bool isJump = false; // ジャンプ状態のフラグ
 
     private void Start()
     {
-        tutorial = Tutorial.MoveToTarget;
-        
+        tutorial = Tutorial.MoveToTarget; // 初期ステップを設定
     }
 
     private void Update()
     {
+        // 現在のチュートリアルステップに応じて処理を実行
         switch (tutorial)
         {
             case Tutorial.MoveToTarget:
@@ -85,12 +81,11 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //所定の位置まで歩く
+    // 所定の位置まで歩く
     private void MoveToTarget()
     {
         // キャラクターが目標地点に到達したかを確認する
-        if (DistanceX(playerController.transform.position.x, 
-            targetsPos[currentIndex].position.x) < 2f)
+        if (Mathf.Abs(player.controller.transform.position.x - targetsPos[currentIndex].position.x) < 2f)
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 1 completed!");
@@ -100,35 +95,34 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //相手に向かってステップ
+    // 相手に向かってステップ
     private void Step()
     {
         bool stepR = anim.GetBool("StepR");
-        if (stepR == true)
+        if (stepR)
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 2 completed!");
             UpdateTutorialStep();
-            //次のステップに移行
+            // 次のステップに移行
             tutorial = Tutorial.Jump;
         }
     }
 
-    //ジャンプ
+    // ジャンプ
     private void Jump()
     {
-        if(DistanceY(playerController.transform.position.y, 
-            targetsPos[currentIndex].position.y) < 0.1f)
+        if (Mathf.Abs(player.controller.transform.position.y - targetsPos[currentIndex].position.y) < 0.1f)
         {
             isJump = true;
         }
 
-        if(!isJump)
+        if (!isJump)
         {
             return;
         }
 
-        if(player.GetIsGround())
+        if (player.GetIsGround())
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 3 completed!");
@@ -137,10 +131,10 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //相手に対して弱攻撃
+    // 相手に対して弱攻撃
     private void N_Weak()
     {
-        if(sandbag.GetIsWeak())
+        if (sandbag.GetIsWeak())
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 4 completed!");
@@ -149,10 +143,10 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //相手に対して中攻撃
+    // 相手に対して中攻撃
     private void N_Middle()
     {
-        if(sandbag.GetIsMiddle())
+        if (sandbag.GetIsMiddle())
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 5 completed!");
@@ -161,10 +155,10 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //相手に対して強攻撃
+    // 相手に対して強攻撃
     private void N_Strong()
     {
-        if(sandbag.GetIsStrong())
+        if (sandbag.GetIsStrong())
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 6 completed!");
@@ -173,11 +167,11 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //しゃがみ
+    // しゃがみ
     private void Crouching()
     {
         bool isCrouching = anim.GetBool("Crouching");
-        if(isCrouching)
+        if (isCrouching)
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 7 completed!");
@@ -186,10 +180,10 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //相手に対してジャンプ攻撃
+    // 相手に対してジャンプ攻撃
     private void JumpAttack()
     {
-        if(sandbag.GetIsJumpAttack())
+        if (sandbag.GetIsJumpAttack())
         {
             // ステップが完了した場合の処理
             Debug.Log("Step 8 completed!");
@@ -199,9 +193,10 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
+    // チュートリアル終了処理
     private void TutorialFinish()
     {
-        //チュートリアル開始の処理
+        // チュートリアル開始の処理
         UpdateTutorialStep();
         if (Input.anyKeyDown)
         {
@@ -209,46 +204,37 @@ public class TutorialCollider : MonoBehaviour
         }
     }
 
-    //チュートリアルをクリアしたときの処理
+    // チュートリアルをクリアしたときの処理
     private void UpdateTutorialStep()
     {
-        FadeController.Instance.SetDuration(1.0f);
         StartCoroutine(NextTutorial());
         player.animState.SetAnimFalse("Crouching");
-        //チュートリアルをクリアしたら、次のチュートリアルが始まるまで動けないようにする
+        // チュートリアルをクリアしたら、次のチュートリアルが始まるまで動けないようにする
         player.State = PlayerAction.MyState.Freeze;
-        //チュートリアル開始の処理
-        StartCoroutine(WarpAndToggleObject());
+        // チュートリアル開始の処理
+        StartCoroutine(WarpAndToggleObjects());
     }
 
-
-    IEnumerator WarpAndToggleObject()
+    // プレイヤーをデフォルトの位置にワープし、目標オブジェクトを切り替える
+    IEnumerator WarpAndToggleObjects()
     {
         yield return new WaitForSeconds(1.0f);
-        //プレイヤーをデフォルトの位置にワープ
+        // プレイヤーをデフォルトの位置にワープ
         player.SetDefaultPos();
         player.animState.ResetAnim();
         player.State = PlayerAction.MyState.Game;
-        //今の目標オブジェクトをfalseにして、次の目標オブジェクトをtrueにする
+        // 今の目標オブジェクトをfalseにして、次の目標オブジェクトをtrueにする
         targetObj[currentIndex].SetActive(false);
         targetObj[currentIndex + 1].SetActive(true);
         targetText[currentIndex].SetActive(false);
         targetText[currentIndex + 1].SetActive(true);
         currentIndex += 1;
     }
+
+    // 次のチュートリアルステップに進む
     private IEnumerator NextTutorial()
     {
         yield return FadeController.Instance.StartCoroutine(FadeController.Instance.FadeOut());
         FadeController.Instance.StartCoroutine(FadeController.Instance.FadeIn());
-    }
-
-    private float DistanceX(float x1,float x2)
-    {
-        return x2 - x1;
-    }
-
-    private float DistanceY(float y1, float y2)
-    {
-        return y2 - y1;
     }
 }
