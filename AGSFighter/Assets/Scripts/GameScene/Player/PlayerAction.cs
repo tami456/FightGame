@@ -95,20 +95,11 @@ public class PlayerAction : MonoBehaviour
         get { return isCrouching; }
         set { isCrouching = value; }
     }
-    public bool GetIsGround()
-    {
-        return isGrounded;
-    }
+    public bool GetIsGround() => isGrounded;
 
-    public float GetSpeed()
-    {
-        return speed;
-    }
+    public float GetSpeed() => speed;
 
-    public string GetHitTag()
-    {
-        return hitHadoTag;
-    }
+    public string GetHitTag() => hitHadoTag;
 
     void Start()
     {

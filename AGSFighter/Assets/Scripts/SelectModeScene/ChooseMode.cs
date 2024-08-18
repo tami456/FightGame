@@ -4,36 +4,37 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
-namespace SelectCharacter
+public class ChooseMode : MonoBehaviour
 {
-    public class ChooseMode : MonoBehaviour
+
+    // 初期化処理
+    private void Start()
     {
+        // 必要な初期化処理があればここに追加
+    }
 
-        private void Start()
-        {
-        }
-        //　キャラクターを選択した時に実行しキャラクターデータをMyGameManagerDataにセット
-        public void OnSelectMode()
-        {
-            //コントローラー使用の場合はここを消す
-            //　ボタンの選択状態を解除して選択したボタンのハイライト表示を可能にする為に実行
-            EventSystem.current.SetSelectedGameObject(null);
+    // キャラクターを選択した時に実行しキャラクターデータをMyGameManagerDataにセット
+    public void OnSelectMode()
+    {
+        // コントローラー使用の場合はここを消す
+        // ボタンの選択状態を解除して選択したボタンのハイライト表示を可能にする為に実行
+        EventSystem.current.SetSelectedGameObject(null);
+    }
 
-        }
-        //　キャラクターを選択した時に背景をオンにする
-        public void SwitchButtonBackground(int buttonNumber)
+    // キャラクターを選択した時に背景をオンにする
+    public void SwitchButtonBackground(int buttonNumber)
+    {
+        for (int i = 0; i < transform.childCount; i++)
         {
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                if (i == buttonNumber - 1)
-                {
-                    transform.GetChild(i).Find("Background").gameObject.SetActive(true);
-                }
-                else
-                {
-                    transform.GetChild(i).Find("Background").gameObject.SetActive(false);
-                }
-            }
+            SetButtonBackground(i, buttonNumber - 1);
         }
     }
+
+    // ボタンの背景を設定する処理
+    private void SetButtonBackground(int index, int selectedButtonIndex)
+    {
+        bool isActive = (index == selectedButtonIndex);
+        transform.GetChild(index).Find("Background").gameObject.SetActive(isActive);
+    }
 }
+

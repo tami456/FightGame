@@ -4,62 +4,62 @@ using UnityEngine;
 
 public class CarDamage : MonoBehaviour
 {
-
+    // プレイヤーのアクションを管理するクラス
     [SerializeField]
-    PlayerAction player;
-    //破壊の閾値
+    private PlayerAction player;
+
+    // 破壊の閾値
     private int destructionThreshold = 1000;
+
     // 蓄積されたダメージ
     private int accumulatedDamage = 0;
     private int damage = 0;
 
-    //飛んでいく力
+    // 飛んでいく力
     [SerializeField]
     private float flyingForce = 0.0f;
 
-    //飛んでいく車のパーツ
+    // 飛んでいく車のパーツ
     [SerializeField]
     private GameObject[] carParts;
     private int partsIndex = 0;
 
+    // 攻撃マネージャー
     [SerializeField]
-    AttackManager attackManager;
+    private AttackManager attackManager;
 
+    // カウントダウン
     [SerializeField]
-    SoloModeCountDown countDown;
-    Score score;
+    private SoloModeCountDown countDown;
+
+    // スコア
+    private Score score;
     private int carBreakScore = 0;
 
-    //UIのアニメーション
+    // UIのアニメーション
     [SerializeField]
-    UIAnimation uiAnim;
+    private UIAnimation uiAnim;
 
-    //SE、BGM
+    // SE、BGM
     [SerializeField]
-    AudioSource audioSource;
+    private AudioSource audioSource;
     [SerializeField]
-    AudioClip se1;
+    private AudioClip se1;
     [SerializeField]
-    AudioClip se2;
+    private AudioClip se2;
 
+    // 初期化処理
     void Start()
     {
         score = GetComponent<Score>();
     }
 
-    private void Update()
-    {
-        
-    }
-
-    //ダメージを与える
+    // ダメージを与える処理
     public void ApplyDamage(ColAnimationEvent attacker)
     {
-        //攻撃してきた相手のアニメーションを取得
         if (attacker.anim != null)
         {
-            foreach (string key in
-                attackManager.attackInfo.Keys)
+            foreach (string key in attackManager.attackInfo.Keys)
             {
                 if (attacker.anim.GetBool(key))
                 {
@@ -68,70 +68,81 @@ public class CarDamage : MonoBehaviour
             }
         }
 
-        //車殴り
-        audioSource.PlayOneShot(se1);
-
-        //ダメージ蓄積
-        accumulatedDamage += damage;
-
-        //一定量超えたらリセット
-        if (accumulatedDamage >= destructionThreshold)
-        {
-            ShatterScatterPart();
-            accumulatedDamage = accumulatedDamage - destructionThreshold;
-            Debug.Log(accumulatedDamage);
-        }
+        PlayDamageSound();
+        AccumulateDamage(damage);
     }
 
+    // プロジェクタイルのダメージを与える処理
     public void ApplyProjectileDamage(int damage)
     {
-        //車殴り
-        audioSource.PlayOneShot(se1);
+        PlayDamageSound();
+        AccumulateDamage(damage);
+    }
 
-        //ダメージ蓄積
+    // ダメージ音を再生する処理
+    private void PlayDamageSound()
+    {
+        audioSource.PlayOneShot(se1);
+    }
+
+    // ダメージを蓄積する処理
+    private void AccumulateDamage(int damage)
+    {
         accumulatedDamage += damage;
 
-        //一定量超えたらリセット
         if (accumulatedDamage >= destructionThreshold)
         {
             ShatterScatterPart();
-            accumulatedDamage = accumulatedDamage - destructionThreshold;
+            accumulatedDamage -= destructionThreshold;
             Debug.Log(accumulatedDamage);
         }
     }
 
-    //車のパーツを飛ばす
-    void ShatterScatterPart()
+    // 車のパーツを飛ばす処理
+    private void ShatterScatterPart()
     {
-        //車破壊
         audioSource.PlayOneShot(se2);
 
-        if(carParts[partsIndex] == null)
+        if (carParts[partsIndex] == null)
         {
-            Debug.Log("もうパーツはありません");
-            carBreakScore = 30000;
-            player.State = PlayerAction.MyState.Freeze;
-            countDown.StartStopTime(true);
-            score.TotalScore(carBreakScore);
-            uiAnim.SceneAnimFalse();
+            HandleAllPartsDestroyed();
             return;
         }
+
         if (carParts.Length > 0)
         {
-            GameObject randomPart = carParts[partsIndex];
-
-            Rigidbody partRb = randomPart.GetComponent<Rigidbody>();
-            if (partRb != null)
-            {
-                partRb.useGravity = true;
-                partRb.isKinematic = false;
-                partRb.AddForce(Random.onUnitSphere * flyingForce, ForceMode.Impulse); // ランダムな方向に力を加える
-            }
+            LaunchCarPart();
             carBreakScore = 0;
             partsIndex++;
         }
     }
 
+    // 全てのパーツが破壊されたときの処理
+    private void HandleAllPartsDestroyed()
+    {
+        Debug.Log("もうパーツはありません");
+        carBreakScore = 30000;
+        player.State = PlayerAction.MyState.Freeze;
+        countDown.StartStopTime(true);
+        score.TotalScore(carBreakScore);
+        uiAnim.SceneAnimFalse();
+    }
+
+    // 車のパーツを飛ばす処理
+    private void LaunchCarPart()
+    {
+        GameObject randomPart = carParts[partsIndex];
+        Rigidbody partRb = randomPart.GetComponent<Rigidbody>();
+
+        if (partRb != null)
+        {
+            partRb.useGravity = true;
+            partRb.isKinematic = false;
+            partRb.AddForce(Random.onUnitSphere * flyingForce, ForceMode.Impulse); // ランダムな方向に力を加える
+        }
+    }
+
+    // 車のスコアを取得する処理
     public int GetCarScore()
     {
         return carBreakScore;

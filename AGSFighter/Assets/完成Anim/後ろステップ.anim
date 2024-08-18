@@ -1282,7 +1282,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.28333333
-        value: 0.5455365
+        value: 0.29648376
         inSlope: -1.4615614
         outSlope: -1.4615614
         tangentMode: 0
@@ -13687,7 +13687,7 @@ AnimationClip:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.28333333
-        value: 0.5455365
+        value: 0.29648376
         inSlope: -1.4615614
         outSlope: -1.4615614
         tangentMode: 0

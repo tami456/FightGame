@@ -5,13 +5,13 @@ using UnityEngine.InputSystem;
 
 public class UIChange : MonoBehaviour
 {
-    //デバイス確認用
-    [SerializeField] 
+    // デバイス確認用
+    [SerializeField]
     private PlayerInput playerInput;
-    //コントローラー用UI
+    // コントローラー用UI
     [SerializeField]
     private List<GameObject> tutoPadUI = new List<GameObject>();
-    //キーボード用UI
+    // キーボード用UI
     [SerializeField]
     private List<GameObject> tutoKeyUI = new List<GameObject>();
 
@@ -31,7 +31,7 @@ public class UIChange : MonoBehaviour
         {
             if (device.name == "Keyboard")
             {
-                foreach(var pad in tutoPadUI)
+                foreach (var pad in tutoPadUI)
                 {
                     pad.SetActive(false);
                 }
@@ -41,7 +41,7 @@ public class UIChange : MonoBehaviour
                 }
                 keyboardActive = true;
                 // Keyboardが見つかったら即座にリターン
-                return; 
+                return;
             }
             else
             {

@@ -5,29 +5,36 @@ using UnityEngine.UI;
 
 public class Blinker : MonoBehaviour
 {
-    //点滅スピード
+    // 点滅スピード
     [SerializeField]
-    private float speed = 1.0f;
-    private Text text;
-    private float time;
+    private float speed = 1.0f; // 点滅の速さを調整するための変数
+    private Text text; // Textコンポーネントを保持する変数
+    private float time; // 時間を追跡するための変数
 
-    // Start is called before the first frame update
-    void Start()
+    // Awakeはスクリプトインスタンスがロードされたときに呼び出される
+    void Awake()
     {
-        text = this.gameObject.GetComponent<Text>();
+        // Textコンポーネントを取得してキャッシュする
+        text = GetComponent<Text>();
     }
 
-    // Update is called once per frame
+    // Updateは毎フレーム呼び出される
     void Update()
     {
-        text.color = GetAlphaColor(text.color);
+        // 新しい色を計算し、変更があれば適用する
+        Color newColor = GetAlphaColor(text.color);
+        if (text.color != newColor)
+        {
+            text.color = newColor;
+        }
     }
 
-    //文字の点滅
+    // 文字の点滅効果を計算する
     Color GetAlphaColor(Color color)
     {
-        time += Time.deltaTime * 5.0f * speed;
-        color.a = Mathf.Sin(time);
+        // 時間を更新し、PingPong関数を使ってアルファ値を計算する
+        time += Time.deltaTime * speed;
+        color.a = Mathf.PingPong(time, 1.0f);
 
         return color;
     }

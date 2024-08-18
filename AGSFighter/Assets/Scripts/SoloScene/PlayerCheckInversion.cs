@@ -4,67 +4,77 @@ using UnityEngine;
 
 public class PlayerCheckInversion : MonoBehaviour
 {
+    // プレイヤーのアクションを管理するクラス
     private PlayerAction player;
-    //接地判定
-    //Rayの長さ
+
+    // Rayの長さ
     [SerializeField]
     private float rayLength = 0.1f;
 
-    //Rayをどれくらい体にめり込ませるか
+    // Rayをどれくらい体にめり込ませるか
     [SerializeField]
     private float rayOffset;
 
-    //Rayの判定に用いるLayer
+    // Rayの判定に用いるLayer
     [SerializeField]
     private LayerMask layerMask = default;
+
+    // 反転状態のフラグ
     [SerializeField]
     private bool isInversion = false;
-    Vector3 vec = Vector3.right;
-    Ray ray;
 
-    // Start is called before the first frame update
+    // Rayの方向
+    private Vector3 vec = Vector3.right;
+    private Ray ray;
+
+    // 初期化処理
     void Start()
     {
         player = GetComponent<PlayerAction>();
     }
 
-    // Update is called once per frame
+    // 毎フレーム呼び出される更新処理
     void Update()
     {
-        //レイを逆方向に飛ばす
-        if(!isInversion)
-        {
-            vec *= -1;
-        }
+        UpdateRayDirection();
     }
 
+    // 固定フレームレートで呼び出される更新処理
     private void FixedUpdate()
     {
-        //ミラー用のオブジェクトに着いているか
         isInversion = CheckInversion();
     }
 
+    // 反転状態を取得するメソッド
     public bool GetIsInversion()
     {
         return isInversion;
     }
 
+    // 反転状態をチェックするメソッド
     private bool CheckInversion()
     {
-        if(player.GetIsGround())
+        if (player.GetIsGround())
         {
-            //放つ光線の初期位置と姿勢
-            //若干身体にめり込ませた一から発射しないと正しく判定できない時がある
-            ray = new Ray(origin: transform.position + Vector3.up * rayOffset, direction: vec);
+            // 放つ光線の初期位置と姿勢
+            ray = new Ray(transform.position + Vector3.up * rayOffset, vec);
         }
-        //Raycastがhitするかどうかで判定
-        //レイヤの指定を忘れずに
+        // Raycastがhitするかどうかで判定
         return Physics.Raycast(ray, rayLength, layerMask);
     }
 
+    // Rayの方向を更新するメソッド
+    private void UpdateRayDirection()
+    {
+        if (!isInversion)
+        {
+            vec *= -1;
+        }
+    }
+
+    // Gizmosを描画するメソッド
     private void OnDrawGizmos()
     {
-        //基本的にレイが当たっている状態なので確認しなくてもいい
         Gizmos.color = isInversion ? Color.green : Color.red;
         Gizmos.DrawRay(transform.position + Vector3.up * rayOffset, vec);
     }

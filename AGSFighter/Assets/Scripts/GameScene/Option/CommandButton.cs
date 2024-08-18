@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CommandButton : MonoBehaviour
 {
+    // ボタンの参照
     [SerializeField]
     private Button SPButton;
     [SerializeField]
@@ -12,6 +13,7 @@ public class CommandButton : MonoBehaviour
     [SerializeField]
     private Button SystemButton;
 
+    // コマンドの参照
     [SerializeField]
     private GameObject SPCom;
     [SerializeField]
@@ -21,38 +23,31 @@ public class CommandButton : MonoBehaviour
     [SerializeField]
     private GameObject SelectCom;
 
-    // Start is called before the first frame update
+    // 初期化処理
     void Start()
     {
         SetupMenuUIEvent();
     }
 
+    // 有効化時の処理
     private void OnEnable()
     {
         SPButton.Select();
     }
 
-    public void SetupMenuUIEvent()
+    // メニューUIのイベント設定
+    private void SetupMenuUIEvent()
     {
-        SPButton.onClick.AddListener(() =>
-        {
-            SPCom.SetActive(true);
-            SPMCom.SetActive(false);
-            SystemCom.SetActive(false);
-        });
+        SPButton.onClick.AddListener(() => ShowCommand(SPCom));
+        SPMButton.onClick.AddListener(() => ShowCommand(SPMCom));
+        SystemButton.onClick.AddListener(() => ShowCommand(SystemCom));
+    }
 
-        SPMButton.onClick.AddListener(() =>
-        {
-            SPMCom.SetActive(true);
-            SPCom.SetActive(false);
-            SystemCom.SetActive(false);
-        });
-
-        SystemButton.onClick.AddListener(() =>
-        {
-            SystemCom.SetActive(true);
-            SPMCom.SetActive(false);
-            SPCom.SetActive(false);
-        });
+    // コマンドを表示する処理
+    private void ShowCommand(GameObject activeCommand)
+    {
+        SPCom.SetActive(activeCommand == SPCom);
+        SPMCom.SetActive(activeCommand == SPMCom);
+        SystemCom.SetActive(activeCommand == SystemCom);
     }
 }

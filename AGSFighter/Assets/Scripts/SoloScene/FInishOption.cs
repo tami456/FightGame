@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class FInishOption : MonoBehaviour
 {
+    // ボタンの参照
     [SerializeField]
     private Button restartButton;
     [SerializeField]
@@ -13,36 +14,44 @@ public class FInishOption : MonoBehaviour
     [SerializeField]
     private Button titleButton;
 
-    // Start is called before the first frame update
+    // 初期化処理
     void Start()
     {
         SetupMenuUIEvent();
     }
 
+    // ボタンを選択する処理
     public void ButtonSelect()
     {
         restartButton.Select();
     }
 
-
-    public void SetupMenuUIEvent()
+    // メニューUIのイベント設定
+    private void SetupMenuUIEvent()
     {
-        restartButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("SoloGameScene");
-        });
+        restartButton.onClick.AddListener(RestartGame);
+        modeButton.onClick.AddListener(LoadSelectModeScene);
+        titleButton.onClick.AddListener(LoadTitleScene);
+    }
 
-        modeButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("SelectModeScene");
-        });
+    // ゲームを再スタートする処理
+    private void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("SoloGameScene");
+    }
 
-        titleButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("TitleScene");
-        });
+    // モード選択シーンを読み込む処理
+    private void LoadSelectModeScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("SelectModeScene");
+    }
+
+    // タイトルシーンを読み込む処理
+    private void LoadTitleScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("TitleScene");
     }
 }

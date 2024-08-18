@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 
 public class OptionButton : MonoBehaviour
 {
+    // オプションメニュー関連のUI要素
     [SerializeField]
     private GameObject option, optionBG, audioSource, commandList, commandSP, key;
     [SerializeField]
@@ -21,109 +22,131 @@ public class OptionButton : MonoBehaviour
     private Button titleButton;
     [SerializeField]
     private Button closeButton;
-    bool optionActive = false;
 
-    // Start is called before the first frame update
+    // オプションメニューの状態を管理するフラグ
+    private bool optionActive = false;
+
+    // 初期化処理
     void Start()
     {
         SetupMenuUIEvent();
     }
+
+    // 毎フレーム呼び出される更新処理
     private void Update()
     {
-        if(OptionActiveFalse(audioSource.activeSelf))
-        {
-            option.SetActive(true);
-            optionBG.SetActive(false);
-            audioSource.SetActive(false);
-        }
-        else if(OptionActiveFalse(commandList.activeSelf))
-        {
-            option.SetActive(true);
-            optionBG.SetActive(false);
-            commandList.SetActive(false);
-            foreach(GameObject command in commandImage)
-            {
-                command.SetActive(false);
-            }
-        }
-        else if(OptionActiveFalse(key.activeSelf))
-        {
-            option.SetActive(true);
-            optionBG.SetActive(false);
-            key.SetActive(false);
-        }
+        HandleOptionClose();
     }
 
-    private bool OptionActiveFalse(bool optionActive)
+    // オプションメニューを閉じる処理
+    private void HandleOptionClose()
     {
-        return optionActive && (Input.GetMouseButtonDown(1)
-            || Input.GetKeyDown(KeyCode.Joystick1Button1));
-    }
-
-    public void OnPauseMenu(InputAction.CallbackContext context)
-    {
-        if(!context.started)
+        if (OptionActiveFalse(audioSource.activeSelf))
         {
-            return;
+            CloseOptionMenu(audioSource);
         }
-        if(!optionActive)
+        else if (OptionActiveFalse(commandList.activeSelf))
         {
-            Time.timeScale = 0f;
-            optionActive = true;
-            option.SetActive(true);
-            audioButton.Select();
-        }
-        else
-        {
-            optionActive = false;
-            Time.timeScale = 1f;
-            option.SetActive(false);
-            audioSource.SetActive(false);
-            commandList.SetActive(false);
+            CloseOptionMenu(commandList);
             foreach (GameObject command in commandImage)
             {
                 command.SetActive(false);
             }
-            key.SetActive(false);
+        }
+        else if (OptionActiveFalse(key.activeSelf))
+        {
+            CloseOptionMenu(key);
         }
     }
 
-    public void SetupMenuUIEvent()
+    // オプションメニューを閉じる条件をチェック
+    private bool OptionActiveFalse(bool optionActive)
     {
-        audioButton.onClick.AddListener(() =>
-        {
-            option.SetActive(false);
-            optionBG.SetActive(true);
-            audioSource.SetActive(true);
-        });
+        return optionActive && (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Joystick1Button2));
+    }
 
-        commandButton.onClick.AddListener(() =>
+    // ポーズメニューの入力処理
+    public void OnPauseMenu(InputAction.CallbackContext context)
+    {
+        if (!context.started)
         {
-            option.SetActive(false);
-            optionBG.SetActive(true);
-            commandList.SetActive(true);
-            commandSP.SetActive(true);
-        });
+            return;
+        }
+        ToggleOptionMenu();
+    }
 
-        keyButton.onClick.AddListener(() =>
+    // オプションメニューの表示/非表示を切り替える
+    private void ToggleOptionMenu()
+    {
+        optionActive = !optionActive;
+        Time.timeScale = optionActive ? 0f : 1f;
+        option.SetActive(optionActive);
+        if (optionActive)
         {
-            option.SetActive(false);
-            optionBG.SetActive(true);
-            key.SetActive(true);
-        });
+            audioButton.Select();
+        }
+        else
+        {
+            CloseAllOptionMenus();
+        }
+    }
 
-        titleButton.onClick.AddListener(() =>
+    // 全てのオプションメニューを閉じる
+    private void CloseAllOptionMenus()
+    {
+        option.SetActive(false);
+        audioSource.SetActive(false);
+        commandList.SetActive(false);
+        foreach (GameObject command in commandImage)
         {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("TitleScene");
-            SoundManager.Instance.StopBGM();
-        });
+            command.SetActive(false);
+        }
+        key.SetActive(false);
+    }
 
-        closeButton.onClick.AddListener(() =>
+    // メニューUIのイベント設定
+    private void SetupMenuUIEvent()
+    {
+        audioButton.onClick.AddListener(() => OpenOptionMenu(audioSource));
+        commandButton.onClick.AddListener(() => OpenOptionMenu(commandList, commandSP));
+        keyButton.onClick.AddListener(() => OpenOptionMenu(key));
+        titleButton.onClick.AddListener(LoadTitleScene);
+        closeButton.onClick.AddListener(CloseOptionMenu);
+    }
+
+    // オプションメニューを開く処理
+    private void OpenOptionMenu(GameObject menu, GameObject additionalMenu = null)
+    {
+        option.SetActive(false);
+        optionBG.SetActive(true);
+        menu.SetActive(true);
+        if (additionalMenu != null)
         {
-            Time.timeScale = 1f;
-            option.SetActive(false);
-            optionActive = false;
-        });
+            additionalMenu.SetActive(true);
+        }
+    }
+
+    // オプションメニューを閉じる処理
+    private void CloseOptionMenu(GameObject menu)
+    {
+        option.SetActive(true);
+        optionBG.SetActive(false);
+        menu.SetActive(false);
+    }
+
+    // タイトルシーンを読み込む処理
+    private void LoadTitleScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("TitleScene");
+        SoundManager.Instance.StopBGM();
+    }
+
+    // オプションメニューを閉じる処理
+    private void CloseOptionMenu()
+    {
+        Time.timeScale = 1f;
+        option.SetActive(false);
+        optionActive = false;
     }
 }

@@ -7,53 +7,56 @@ using UnityEngine.InputSystem.Utilities;
 
 public class PlayerInputSystem : MonoBehaviour
 {
-    //プレイヤー
-    private PlayerAction player;
-    private PlayerHit pHit;
-    private PlayerAnimationEvent playerAnim;
-    private AnimationState animState;
-    private PlayerGuard playerGuard;
-    private PlayerGuardPose playerGuardPose;
+    // プレイヤー関連の変数
+    private PlayerAction player; // プレイヤーのアクションを管理するクラス
+    private PlayerHit pHit; // プレイヤーのヒット情報を管理するクラス
+    private PlayerAnimationEvent playerAnim; // プレイヤーのアニメーションイベントを管理するクラス
+    private AnimationState animState; // アニメーションの状態を管理するクラス
+    private PlayerGuard playerGuard; // プレイヤーのガード状態を管理するクラス
+    private PlayerGuardPose playerGuardPose; // プレイヤーのガードポーズを管理するクラス
 
-    //動きの量
-    private Vector3 moveDirection;
-    private float speed;
+    // 動きの量を管理する変数
+    private Vector3 moveDirection; // プレイヤーの移動方向
+    private float speed; // プレイヤーの移動速度
 
-    //ステップ時の移動量
+    // ステップ時の移動量を管理する変数
     [SerializeField]
-    private float step = 10.0f;
+    private float step = 10.0f; // ステップ時の移動量
 
-    //入力確認
-    private float rv = 0.0f;
-    private float lv = 0.0f;
-    private float uv = 0.0f;
-    private float dv = 0.0f;
+    // 入力確認用の変数
+    private float rv = 0.0f; // 右方向の入力値
+    private float lv = 0.0f; // 左方向の入力値
+    private float uv = 0.0f; // 上方向の入力値
+    private float dv = 0.0f; // 下方向の入力値
 
-    //ジャンプ
-    private bool isJump = false;
-    private float jumpSpeed = 50.0f;
-    private float jumpSpeedX = 10.0f;
+    // ジャンプ関連の変数
+    private bool isJump = false; // ジャンプ中かどうかのフラグ
+    private float jumpSpeed = 50.0f; // ジャンプの速度
+    private float jumpSpeedX = 10.0f; // ジャンプの横方向の速度
 
-    //技の状態
+    // 技の状態を管理する変数
     [SerializeField]
-    private bool attackFlag = false;
+    private bool attackFlag = false; // 攻撃中かどうかのフラグ
 
-    //ジャンプの状態
+    // ジャンプの状態を管理する変数
     [SerializeField]
-    private bool jumpFlag = false;
+    private bool jumpFlag = false; // ジャンプ中かどうかのフラグ
 
-    //ガード
+    // ガード関連の変数
     [SerializeField]
-    float guard = 0.0f;
+    float guard = 0.0f; // ガードの強度
     [SerializeField]
-    private float guardMove = 0.0f;
-    public bool guardSFlag = false;
-    public bool guardSPFlag = false;
-    public bool guardCFlag = false;
-    public bool guardCPFlag = false;
+    private float guardMove = 0.0f; // ガード中の移動量
+    public bool guardSFlag = false; // 立ちガードのフラグ
+    public bool guardSPFlag = false; // 立ちガードポーズのフラグ
+    public bool guardCFlag = false; // しゃがみガードのフラグ
+    public bool guardCPFlag = false; // しゃがみガードポーズのフラグ
     [SerializeField]
-    private bool assistFlag = false;
-    private const float RecoilTime = 0.3f;
+    private bool assistFlag = false; // アシストボタンを押しているかフラグ
+    private const float RecoilTime = 0.3f; // リコイル時間の定数
+
+
+    //Get関数Set関数
     public bool AttackFlag
     {
         get { return attackFlag; }
@@ -71,39 +74,21 @@ public class PlayerInputSystem : MonoBehaviour
         set { jumpFlag = value; }
     }
 
-    public bool GuardSFlag
-    {
-        get { return guardSFlag; }
-    }
+    public bool GuardSFlag => guardSFlag;
 
-    public bool GuardCFlag
-    {
-        get { return guardCFlag; }
-    }
+    public bool GuardCFlag => guardCFlag;
 
     //右方向の入力の受け渡し
-    public float RV()
-    {
-        return rv;
-    }
+    public float RV() => rv;
 
     //左方向の入力の受け渡し
-    public float LV()
-    {
-        return lv;
-    }
+    public float LV() => lv;
 
     //上方向の入力の受け渡し
-    public float UV()
-    {
-        return uv;
-    }
+    public float UV() => uv;
 
     //下方向の入力の受け渡し
-    public float DV()
-    {
-        return dv;
-    }
+    public float DV() => dv;
 
     // Start is called before the first frame update
     void Start()
@@ -119,41 +104,50 @@ public class PlayerInputSystem : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //ステップ
+        HandleStep();
+        HandleGuard();
+    }
+
+    // ステップ処理を分離
+    private void HandleStep()
+    {
         if (playerAnim.StepL)
         {
-            Vector3 moveDirection = new Vector3(-step, 0, 0) * Time.deltaTime;
-            player.controller.Move(moveDirection);
-            player.animState.SetAnimFalse("BackMove");
-            player.animState.SetAnimFalse("FrontMove");
-
-            if (!player.anim.GetBool("Mirror"))
-            {
-                player.animState.SetAnimTrue("StepL");
-            }
-            else
-            {
-                player.animState.SetAnimTrue("StepR");
-            }
+            MovePlayer(-step);
+            SetStepAnimation("StepL", "StepR");
         }
         else if (playerAnim.StepR)
         {
-            Vector3 moveDirection = new Vector3(step, 0, 0) * Time.deltaTime;
-            player.controller.Move(moveDirection);
-            player.animState.SetAnimFalse("FrontMove");
-            player.animState.SetAnimFalse("BackMove");
-
-            if (!player.anim.GetBool("Mirror"))
-            {
-                player.animState.SetAnimTrue("StepR");
-            }
-            else
-            {
-                player.animState.SetAnimTrue("StepL");
-            }
+            MovePlayer(step);
+            SetStepAnimation("StepR", "StepL");
         }
+    }
 
-        //ガード処理
+    // プレイヤーの移動処理
+    private void MovePlayer(float step)
+    {
+        Vector3 moveDirection = new Vector3(step, 0, 0) * Time.deltaTime;
+        player.controller.Move(moveDirection);
+        player.animState.SetAnimFalse("BackMove");
+        player.animState.SetAnimFalse("FrontMove");
+    }
+
+    // ステップアニメーションの設定
+    private void SetStepAnimation(string animTrue, string animFalse)
+    {
+        if (!player.anim.GetBool("Mirror"))
+        {
+            player.animState.SetAnimTrue(animTrue);
+        }
+        else
+        {
+            player.animState.SetAnimTrue(animFalse);
+        }
+    }
+
+    // ガード処理を分離
+    private void HandleGuard()
+    {
         if (guardSFlag || guardCFlag)
         {
             guard++;
@@ -161,87 +155,69 @@ public class PlayerInputSystem : MonoBehaviour
 
         if (pHit.Damage.Item3 != AttackLevel.NullLevel)
         {
-            if ((!player.anim.GetBool("Mirror") && lv == 1) || (player.anim.GetBool("Mirror") && rv == 1))
+            HandleGuardState();
+        }
+
+        if (!playerGuard.IsGuard && !playerGuardPose.IsGuard && guard > 50f)
+        {
+            ResetGuard();
+        }
+    }
+
+    // ガード状態の処理
+    private void HandleGuardState()
+    {
+        bool isMirror = player.anim.GetBool("Mirror");
+        bool isLeftValid = (!isMirror && lv == 1);
+        bool isRightValid = (isMirror && rv == 1);
+
+        if (isLeftValid || isRightValid)
+        {
+            if (!player.IsCrouching && playerGuard.IsGuard && !guardSFlag)
             {
-                if (!player.IsCrouching && playerGuard.IsGuard && !guardSFlag)
-                {
-                    ExecuteGuard("StandingGuard");
-                    playerGuard.InstantiateGuardEffect();
-                    guardSFlag = true;
-
-                    if (lv == 1)
-                    {
-                        StartCoroutine(Recoil(2f));
-                    }
-                    else if (rv == 1)
-                    {
-                        StartCoroutine(Recoil(-2f));
-                    }
-                }
-                else if (!player.IsCrouching && playerGuardPose.IsGuard && !guardSPFlag)
-                {
-                    ExecuteGuard("StandingGuard");
-                    guardSPFlag = true;
-
-                    if (lv == 1)
-                    {
-                        StartCoroutine(Recoil(2f));
-                    }
-                    else if (rv == 1)
-                    {
-                        StartCoroutine(Recoil(-2f));
-                    }
-                }
-
-                if (player.IsCrouching && playerGuard.IsGuard && !guardCFlag
-                    && (pHit.Damage.Item3 == AttackLevel.Low || pHit.Damage.Item3 == AttackLevel.High))
-                {
-                    ExecuteGuard("CrouchingGuard");
-                    playerGuard.InstantiateGuardEffect();
-                    guardCFlag = true;
-
-                    if (lv == 1)
-                    {
-                        StartCoroutine(Recoil(2f));
-                    }
-                    else if (rv == 1)
-                    {
-                        StartCoroutine(Recoil(-2f));
-                    }
-                }
-                else if (player.IsCrouching && playerGuardPose.IsGuard && !guardCPFlag)
-                {
-                    ExecuteGuard("CrouchingGuard");
-                    guardCPFlag = true;
-                    if (lv == 1)
-                    {
-                        StartCoroutine(Recoil(2f));
-                    }
-                    else if (rv == 1)
-                    {
-                        StartCoroutine(Recoil(-2f));
-                    }
-                }
+                ExecuteGuard("StandingGuard");
+                playerGuard.InstantiateGuardEffect();
+                guardSFlag = true;
+                StartCoroutine(Recoil(isLeftValid ? 2f : -2f));
+            }
+            else if (!player.IsCrouching && playerGuardPose.IsGuard && !guardSPFlag)
+            {
+                ExecuteGuard("StandingGuard");
+                guardSPFlag = true;
+                StartCoroutine(Recoil(isLeftValid ? 2f : -2f));
             }
 
-            //ガードを解く
-            if (!playerGuard.IsGuard && !playerGuardPose.IsGuard)
+            if (player.IsCrouching && playerGuard.IsGuard && !guardCFlag
+                && (pHit.Damage.Item3 == AttackLevel.Low || pHit.Damage.Item3 == AttackLevel.High))
             {
-                if (guard > 50f)
-                {
-                    guardSFlag = false;
-                    guardSPFlag = false;
-                    guardCFlag = false;
-                    guardCPFlag = false;
-                    playerAnim.CallCancel();
-                    guard = 0.0f;
-                    player.animState.SetAnimFalse("StandingGuard");
-                    player.animState.SetAnimFalse("CrouchingGuard");
-                    player.DetectPadHorizontalInput();
-                }
+                ExecuteGuard("CrouchingGuard");
+                playerGuard.InstantiateGuardEffect();
+                guardCFlag = true;
+                StartCoroutine(Recoil(isLeftValid ? 2f : -2f));
+            }
+            else if (player.IsCrouching && playerGuardPose.IsGuard && !guardCPFlag)
+            {
+                ExecuteGuard("CrouchingGuard");
+                guardCPFlag = true;
+                StartCoroutine(Recoil(isLeftValid ? 2f : -2f));
             }
         }
     }
+
+    // ガードのリセット
+    private void ResetGuard()
+    {
+        guardSFlag = false;
+        guardSPFlag = false;
+        guardCFlag = false;
+        guardCPFlag = false;
+        playerAnim.CallCancel();
+        guard = 0.0f;
+        player.animState.SetAnimFalse("StandingGuard");
+        player.animState.SetAnimFalse("CrouchingGuard");
+        player.DetectPadHorizontalInput();
+    }
+
 
     //InputSystem
     //プレイヤー移動右方向
@@ -425,14 +401,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
-    public bool CanJump()
-    {
-        return player.State == PlayerAction.MyState.Game && player.GetIsGround()
-            && !player.IsCrouching && !playerAnim.StepL && !playerAnim.StepR 
-            && player.anim.GetBool("JumpSF") == false && jumpFlag == false 
-            && player.anim.GetBool("Cancel");
-    }
-
+    //アシストボタン
     public void AssistButton(InputAction.CallbackContext context)
     {
         assistFlag = true;
@@ -519,6 +488,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //鎖骨割り
     public void OnSakotsuwari(InputAction.CallbackContext context)
     {
         if (!context.started)
@@ -532,6 +502,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //鎖骨割り
     public void OnMirrorSakotsuwari(InputAction.CallbackContext context)
     {
         if (!context.started)
@@ -575,6 +546,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //昇竜拳反転
     public void OnMirrorSyoryuken(InputAction.CallbackContext context)
     {
         if (!context.started)
@@ -602,6 +574,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //竜巻反転
     public void OnMirrorTatsumaki(InputAction.CallbackContext context)
     {
         if (!context.started)
@@ -615,6 +588,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //波衝撃
     public void OnHasyogeki(InputAction.CallbackContext context)
     {
         if(!context.started)
@@ -658,6 +632,7 @@ public class PlayerInputSystem : MonoBehaviour
         }
     }
 
+    //アニメーションリセット
     private void ResetMove()
     {
         player.animState.SetAnimFalse("FrontMove");
@@ -667,6 +642,7 @@ public class PlayerInputSystem : MonoBehaviour
     }
 
     //攻撃時のアニメーションと移動処理
+    //通常攻撃と必殺技
     private void ExecuteAttack(string attackName)
     {
         if(player.anim.GetBool(attackName))
@@ -684,6 +660,7 @@ public class PlayerInputSystem : MonoBehaviour
         player.MoveDirection = moveDirection;
     }
 
+    //アシストコンボ
     private void ExecuteCombo(string attackName)
     {
         if (player.anim.GetBool(attackName))
@@ -700,6 +677,7 @@ public class PlayerInputSystem : MonoBehaviour
         player.MoveDirection = moveDirection;
     }
 
+    //ガード
     private void ExecuteGuard(string guardName)
     {
         animState.ResetAnim();
@@ -708,6 +686,7 @@ public class PlayerInputSystem : MonoBehaviour
         player.MoveDirection = moveDirection;
     }
 
+    //ジャンプ攻撃
     private void ExecuteJumpAttack(string attackName)
     {
         player.animState.SetAnimTrue(attackName);
@@ -722,7 +701,7 @@ public class PlayerInputSystem : MonoBehaviour
         isJump = true;
     }
 
-    //ガードズザザァ…
+    //ガード時の後ずさり
     IEnumerator Recoil(float speed)
     {
         float recoilSpeed = speed;
@@ -742,6 +721,7 @@ public class PlayerInputSystem : MonoBehaviour
         player.DetectPadHorizontalInput();
     }
 
+    //キャンセルフレーム時に同じ攻撃を連続で出せるようにする
     IEnumerator DelayAnim(string attackName)
     {
         yield return new WaitForSeconds(0.001f);
@@ -753,6 +733,7 @@ public class PlayerInputSystem : MonoBehaviour
     }
 
     //bool関数
+    //移動できるか
     private bool CanMove()
     {
         return player.State == PlayerAction.MyState.Game && player.GetIsGround()
@@ -761,18 +742,30 @@ public class PlayerInputSystem : MonoBehaviour
             && !player.anim.GetBool("JumpSF") && !playerGuard.IsGuard;
     }
 
+    //ジャンプできるか
+    public bool CanJump()
+    {
+        return player.State == PlayerAction.MyState.Game && player.GetIsGround()
+            && !player.IsCrouching && !playerAnim.StepL && !playerAnim.StepR
+            && player.anim.GetBool("JumpSF") == false && jumpFlag == false
+            && player.anim.GetBool("Cancel");
+    }
+
+    //攻撃できるか
     private bool CanNormalAttack(bool isCrouching)
     {
         return player.State == PlayerAction.MyState.Game && player.GetIsGround()
             && isCrouching && !attackFlag && player.anim.GetBool("Cancel");
     }
 
+    //ジャンプできるか
     private bool CanJumpAttack(bool isCrouching)
     {
         return player.State == PlayerAction.MyState.Game && player.anim.GetBool("JumpSF") == true
             && isCrouching && !attackFlag && player.anim.GetBool("Cancel");
     }
 
+    //反転した時用のアニメーション
     private bool MirrorAnimation(bool isCrouching, bool mirror)
     {
         return player.State == PlayerAction.MyState.Game && player.GetIsGround()

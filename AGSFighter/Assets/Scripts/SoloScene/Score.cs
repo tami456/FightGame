@@ -5,104 +5,142 @@ using UnityEngine.UI;
 
 public class Score : MonoBehaviour
 {
+    // UI要素
     [SerializeField]
-    private Text score;
+    private Text score; // 現在のスコアを表示するテキスト
     [SerializeField]
-    private Text highScore;
+    private Text highScore; // ハイスコアを表示するテキスト
     [SerializeField]
-    private Text timeScoreText;
+    private Text timeScoreText; // タイムスコアを表示するテキスト
     [SerializeField]
-    private Text perfectScoreText;
+    private Text perfectScoreText; // パーフェクトスコアを表示するテキスト
     [SerializeField]
-    private Text totalScoreText;
+    private Text totalScoreText; // トータルスコアを表示するテキスト
     [SerializeField]
-    private Text scoreText;
+    private Text scoreText; // 最終スコアを表示するテキスト
 
-    private int scoreIndex;
-    private int scoreCurrentIndex;
-    private int timeScore;
-    private int carBreakScore;
-    private int totalScore;
-    private int finishScore;
+    // スコア関連の変数
+    private int scoreIndex; // 現在のスコアインデックス
+    private int scoreCurrentIndex; // 現在のスコア
+    private int timeScore; // タイムスコア
+    private int carBreakScore; // 車の破壊スコア
+    private int totalScore; // トータルスコア
+    private int finishScore; // 最終スコア
 
+    // 他のコンポーネント
     [SerializeField]
-    AttackManager attackManager;
+    private AttackManager attackManager; // 攻撃マネージャー
     [SerializeField]
-    SoloModeCountDown countDown;
+    private SoloModeCountDown countDown; // カウントダウン
     [SerializeField]
-    UIAnimation uiAnim;
+    private UIAnimation uiAnim; // UIアニメーション
 
-    // Start is called before the first frame update
+    // 初期化処理
     void Start()
     {
-        //スコアリセット
-        //PlayerPrefs.SetInt("HighScore", 0);
-        highScore.text = PlayerPrefs.GetInt("HighScore") + "";
+        InitializeHighScore();
     }
 
-    // Update is called once per frame
+    // ハイスコアの初期化
+    private void InitializeHighScore()
+    {
+        // スコアリセット
+        // PlayerPrefs.SetInt("HighScore", 0);
+        highScore.text = PlayerPrefs.GetInt("HighScore").ToString();
+    }
+
+    // 毎フレーム呼び出される更新処理
     void Update()
     {
-        if(countDown.GetTime() < 0)
+        CheckCountDown();
+    }
+
+    // カウントダウンのチェック
+    private void CheckCountDown()
+    {
+        if (countDown.GetTime() < 0)
         {
             uiAnim.SceneAnimFalse();
         }
     }
 
+    // トリガーに衝突したときの処理
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Attack")
+        if (other.CompareTag("Attack"))
         {
-            Transform currentTransform = other.transform;
-            ColAnimationEvent attackerEvent = null;
-            while (currentTransform != null)
+            ColAnimationEvent attackerEvent = GetAttackerEvent(other.transform);
+            if (attackerEvent != null)
             {
-                attackerEvent = currentTransform.GetComponent<ColAnimationEvent>();
-                if (attackerEvent != null)
-                {
-                    break;
-                }
-                currentTransform = currentTransform.parent;
+                AddScore(attackerEvent);
             }
-
-            
         }
     }
 
+    // 攻撃者のイベントを取得
+    private ColAnimationEvent GetAttackerEvent(Transform currentTransform)
+    {
+        while (currentTransform != null)
+        {
+            ColAnimationEvent attackerEvent = currentTransform.GetComponent<ColAnimationEvent>();
+            if (attackerEvent != null)
+            {
+                return attackerEvent;
+            }
+            currentTransform = currentTransform.parent;
+        }
+        return null;
+    }
+
+    // スコアを追加
     public void AddScore(ColAnimationEvent attacker)
     {
         if (attacker.anim != null)
         {
-            foreach (string key in
-                attackManager.attackInfo.Keys)
+            foreach (string key in attackManager.attackInfo.Keys)
             {
                 if (attacker.anim.GetBool(key))
                 {
                     scoreIndex = attackManager.GetAttackDetails(key).damage;
-                    scoreCurrentIndex = scoreCurrentIndex + scoreIndex;
+                    scoreCurrentIndex += scoreIndex;
                 }
             }
-            score.text = scoreCurrentIndex + "";
+            score.text = scoreCurrentIndex.ToString();
         }
     }
+
+    // プロジェクタイルのスコアを追加
     public void AddProjectileScore(int damage)
     {
         scoreIndex = damage;
-        scoreCurrentIndex = scoreCurrentIndex + scoreIndex;
-        score.text = scoreCurrentIndex + "";
+        scoreCurrentIndex += scoreIndex;
+        score.text = scoreCurrentIndex.ToString();
     }
 
+    // トータルスコアを計算
     public void TotalScore(int carBreakScore)
     {
         timeScore = countDown.GetTime() * 1000;
         this.carBreakScore = carBreakScore;
         totalScore = timeScore + this.carBreakScore;
-        timeScoreText.text = timeScore + "";
-        perfectScoreText.text = carBreakScore + "";
-        totalScoreText.text = totalScore + "";
+        UpdateScoreTexts();
         finishScore = totalScore + scoreCurrentIndex + scoreIndex;
-        scoreText.text = finishScore + "";
+        scoreText.text = finishScore.ToString();
 
+        UpdateHighScore();
+    }
+
+    // スコアテキストを更新
+    private void UpdateScoreTexts()
+    {
+        timeScoreText.text = timeScore.ToString();
+        perfectScoreText.text = carBreakScore.ToString();
+        totalScoreText.text = totalScore.ToString();
+    }
+
+    // ハイスコアを更新
+    private void UpdateHighScore()
+    {
         if (PlayerPrefs.GetInt("HighScore") < finishScore)
         {
             PlayerPrefs.SetInt("HighScore", finishScore);

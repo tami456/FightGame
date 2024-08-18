@@ -4,54 +4,87 @@ using UnityEngine;
 
 public class UIAnimation : MonoBehaviour
 {
+    // プレイヤーのアクションを管理するクラス
     [SerializeField]
-    PlayerAction player;
+    private PlayerAction player;
 
+    // UI要素
     [SerializeField]
-    GameObject ready;
+    private GameObject ready;
     [SerializeField]
-    GameObject go;
+    private GameObject go;
     [SerializeField]
-    GameObject ui;
+    private GameObject ui;
     [SerializeField]
-    GameObject finishOption;
+    private GameObject finishOption;
     [SerializeField]
-    FInishOption finishPanel;
+    private FInishOption finishPanel;
+
+    // オーディオ関連
     [SerializeField]
     private AudioSource readyAudioSource;
     [SerializeField]
     private AudioClip readyAudio;
 
-    Animator anim;
-    SoloModeCountDown countDown;
+    // アニメーターとカウントダウン
+    private Animator anim;
+    private SoloModeCountDown countDown;
 
+    // 初期化処理
     private void Start()
+    {
+        InitializeComponents();
+        StartCountdown();
+        TriggerReadyAnimation();
+        FreezePlayer();
+    }
+
+    // コンポーネントの初期化
+    private void InitializeComponents()
     {
         countDown = GetComponent<SoloModeCountDown>();
         anim = GetComponent<Animator>();
+    }
+
+    // カウントダウンの開始
+    private void StartCountdown()
+    {
         countDown.StartStopTime(true);
+    }
+
+    // "Ready"アニメーションのトリガー
+    private void TriggerReadyAnimation()
+    {
         anim.SetTrigger("Ready");
+    }
+
+    // プレイヤーをフリーズ状態にする
+    private void FreezePlayer()
+    {
         player.State = PlayerAction.MyState.Freeze;
     }
 
-    // Start is called before the first frame update
-    void ScoreTrue()
+    // スコアが有効になったときの処理
+    private void ScoreTrue()
     {
         anim.SetTrigger("ScoreTrue");
         ui.SetActive(false);
     }
 
+    // ゲーム終了アニメーションのトリガー
     public void SceneAnimFalse()
     {
         anim.SetTrigger("GameFinish");
     }
 
-    void ReadyAudio()
+    // "Ready"オーディオの再生
+    private void ReadyAudio()
     {
         readyAudioSource.PlayOneShot(readyAudio);
     }
 
-    void GOTextStart()
+    // "GO"テキストの表示とアニメーションのトリガー
+    private void GOTextStart()
     {
         ready.SetActive(false);
         go.SetActive(true);
@@ -59,14 +92,16 @@ public class UIAnimation : MonoBehaviour
         SoundManager.Instance.PlayUIClip("男衆「始めいッ！」");
     }
 
-    void GOFalse()
+    // "GO"テキストの非表示とカウントダウンの再開
+    private void GOFalse()
     {
         go.SetActive(false);
         countDown.StartStopTime(false);
         player.State = PlayerAction.MyState.Game;
     }
 
-    void FinishOptionTrue()
+    // 終了オプションの表示
+    private void FinishOptionTrue()
     {
         finishOption.SetActive(true);
         finishPanel.ButtonSelect();

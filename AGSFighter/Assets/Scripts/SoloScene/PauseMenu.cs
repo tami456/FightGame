@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 
 public class PauseMenu : MonoBehaviour
 {
+    // ボタンの参照
     [SerializeField]
     private Button backBattleButton;
     [SerializeField]
@@ -15,70 +16,83 @@ public class PauseMenu : MonoBehaviour
     private Button modeButton;
     [SerializeField]
     private Button titleButton;
+
+    // メニューUIと背景
     [SerializeField]
-    GameObject menuUI,menuBG;
-    private int i = 0;
+    private GameObject menuUI;
+    [SerializeField]
+    private GameObject menuBG;
 
+    // ポーズメニューの状態を管理するフラグ
+    private bool isPaused = false;
 
-    // Start is called before the first frame update
+    // 初期化処理
     void Start()
     {
         SetupMenuUIEvent();
     }
 
+    // 有効化時の処理
     private void OnEnable()
     {
         backBattleButton.Select();
     }
 
+    // ポーズメニューの入力処理
     public void OnPauseMenu(InputAction.CallbackContext context)
     {
-        if(!context.started)
+        if (!context.started)
         {
             return;
         }
-        if(i == 1)
-        {
-            Time.timeScale = 1f;
-            i = 0;
-            menuUI.SetActive(false);
-            menuBG.SetActive(false);
-        }
-        else
-        {
-            Time.timeScale = 0f;
-            i = 1;
-            menuUI.SetActive(true);
-            menuBG.SetActive(true);
-        }
+        TogglePauseMenu();
     }
 
-    public void SetupMenuUIEvent()
+    // ポーズメニューの表示/非表示を切り替える
+    private void TogglePauseMenu()
     {
-        backBattleButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            i = 0;
-            menuUI.SetActive(false);
-            menuBG.SetActive(false);
-        });
+        isPaused = !isPaused;
+        Time.timeScale = isPaused ? 0f : 1f;
+        menuUI.SetActive(isPaused);
+        menuBG.SetActive(isPaused);
+    }
 
-        restartButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("SoloGameScene");
-        });
+    // メニューUIのイベント設定
+    private void SetupMenuUIEvent()
+    {
+        backBattleButton.onClick.AddListener(ResumeGame);
+        restartButton.onClick.AddListener(RestartGame);
+        modeButton.onClick.AddListener(LoadSelectModeScene);
+        titleButton.onClick.AddListener(LoadTitleScene);
+    }
 
-        modeButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("SelectModeScene");
-        });
+    // ゲームを再開する処理
+    private void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        isPaused = false;
+        menuUI.SetActive(false);
+        menuBG.SetActive(false);
+    }
 
-        titleButton.onClick.AddListener(() =>
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("TitleScene");
-        });
+    // ゲームを再スタートする処理
+    private void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("SoloGameScene");
+    }
+
+    // モード選択シーンを読み込む処理
+    private void LoadSelectModeScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("SelectModeScene");
+    }
+
+    // タイトルシーンを読み込む処理
+    private void LoadTitleScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("TitleScene");
     }
 }

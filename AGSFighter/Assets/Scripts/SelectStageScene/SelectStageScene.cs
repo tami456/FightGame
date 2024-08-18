@@ -7,22 +7,41 @@ namespace SelectCharacter
 {
     public class SelectStageScene : MonoBehaviour
     {
-        public GameObject loadingSpinner; // ローディングスピナーの参照
+        // ローディングスピナーの参照
+        public GameObject loadingSpinner;
 
+        // 初期化処理
         private void Start()
         {
-            // ローディングスピナーを初期状態では非表示に設定
-            loadingSpinner.SetActive(false);
+            InitializeLoadingSpinner();
+            CheckRoundManagerInstance();
+        }
 
+        // ローディングスピナーを初期状態で非表示に設定
+        private void InitializeLoadingSpinner()
+        {
+            loadingSpinner.SetActive(false);
+        }
+
+        // RoundManagerのインスタンスをチェック
+        private void CheckRoundManagerInstance()
+        {
             if (RoundManager.Instance == null)
             {
                 Debug.LogError("RoundManagerのインスタンスが見つかりません。シーンに配置されていることを確認してください。");
             }
         }
 
+        // 他のシーンに移動する処理
         public void GoToOtherScene(string stage)
         {
-            // 次のシーンデータをRoundManagerに保存
+            SaveSelectedStage(stage);
+            StartCoroutine(LoadSceneAsync(stage));
+        }
+
+        // 選択されたステージをRoundManagerに保存
+        private void SaveSelectedStage(string stage)
+        {
             if (RoundManager.Instance != null)
             {
                 RoundManager.Instance.SetSelectedStage(stage);
@@ -31,15 +50,12 @@ namespace SelectCharacter
             {
                 Debug.LogError("RoundManagerのインスタンスがありません");
             }
-
-            // 非同期読み込みを開始
-            StartCoroutine(LoadSceneAsync(stage));
         }
 
+        // シーンの非同期読み込み処理
         private IEnumerator LoadSceneAsync(string sceneName)
         {
-            // ローディングスピナーを表示
-            loadingSpinner.SetActive(true);
+            ShowLoadingSpinner();
 
             // シーンの非同期読み込みを開始
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
@@ -50,7 +66,18 @@ namespace SelectCharacter
                 yield return null;
             }
 
-            // 読み込みが完了したらローディングスピナーを非表示にする
+            HideLoadingSpinner();
+        }
+
+        // ローディングスピナーを表示
+        private void ShowLoadingSpinner()
+        {
+            loadingSpinner.SetActive(true);
+        }
+
+        // ローディングスピナーを非表示
+        private void HideLoadingSpinner()
+        {
             loadingSpinner.SetActive(false);
         }
     }

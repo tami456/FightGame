@@ -7,27 +7,21 @@ namespace SelectCharacter
 {
     public class TitleScene : MonoBehaviour
     {
-
+        // スタート時にフェードインを開始
         private void Start()
         {
-            // 特定のオブジェクトを削除する
-            GameObject player1 = GameObject.Find("yuji");
-            GameObject player2 = GameObject.Find("yuji2P");
-
-            if (player1 != null)
-                Destroy(player1);
-
-            if (player2 != null)
-                Destroy(player2);
             StartCoroutine(FadeController.Instance.FadeIn());
         }
 
+        // 毎フレーム呼び出される
         public void Update()
         {
+            // 何かキーが押された場合
             if (Input.anyKeyDown)
             {
+                // 効果音を再生
                 SoundManager.Instance.PlayUIClip("ガラスが割れる1");
-                //　チュートリアルシーンへ
+                // チュートリアルシーンへ移動
                 SceneManager.LoadScene("TutorialScene");
             }
         }

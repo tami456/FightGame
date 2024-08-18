@@ -6,76 +6,49 @@ using UnityEngine.UI;
 public class SandBag : MonoBehaviour
 {
     [SerializeField]
-    TutorialCollider tuto;
-    //チュートリアルテスト用の敵
+    private TutorialCollider tuto; // チュートリアル用のコライダー
     [SerializeField]
-    private Animator anim;
-    private AnimationState state;
-    private bool isWeak = false;
-    private bool isMiddle = false;
-    private bool isStrong = false;
-    private bool isJumpAttack = false;
-    Animator animator;
+    private Animator anim; // アニメーターコンポーネント
+    private AnimationState state; // アニメーションステート
+    private bool isWeak = false; // 弱攻撃フラグ
+    private bool isMiddle = false; // 中攻撃フラグ
+    private bool isStrong = false; // 強攻撃フラグ
+    private bool isJumpAttack = false; // ジャンプ攻撃フラグ
+    private Animator animator; // アニメーター
     [SerializeField]
-    GameObject impactEffect,time;
+    private GameObject impactEffect; // 衝突エフェクト
+    [SerializeField]
+    private GameObject time; // 時間オブジェクト（用途不明）
 
-    // Start is called before the first frame update
-    void Start()
+    // 各攻撃フラグのゲッター
+    public bool GetIsWeak() => isWeak;
+    public bool GetIsMiddle() => isMiddle;
+    public bool GetIsStrong() => isStrong;
+    public bool GetIsJumpAttack() => isJumpAttack;
+
+    // Awakeはスクリプトインスタンスがロードされたときに呼び出される
+    void Awake()
     {
         state = GetComponent<AnimationState>();
         animator = GetComponent<Animator>();
         animator.SetBool("Mirror", true);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
+    // トリガーに衝突したときに呼び出される
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Attack")
+        if (other.CompareTag("Attack"))
         {
             // 衝突した場所にエフェクトを生成
             Vector3 position = other.ClosestPoint(transform.position); // 衝突した場所の近くの点を取得
             Instantiate(impactEffect, position, Quaternion.identity);
 
-            if (anim.GetBool("N_Weak"))
-            {
-                isWeak = true;
-            }
-            else if(anim.GetBool("N_Mid"))
-            {
-                isMiddle = true;
-            }
-            else if(anim.GetBool("N_Stro"))
-            {
-                isStrong = true;
-            }
-            else if(anim.GetBool("JumpKick") || anim.GetBool("JumpKick2") || anim.GetBool("JumpPunch"))
-            {
-                isJumpAttack = true;
-            }
+            // 攻撃の種類に応じてフラグを設定
+            isWeak = anim.GetBool("N_Weak");
+            isMiddle = anim.GetBool("N_Mid");
+            isStrong = anim.GetBool("N_Stro");
+            isJumpAttack = anim.GetBool("JumpKick") || anim.GetBool("JumpKick2") || anim.GetBool("JumpPunch");
         }
     }
 
-    public bool GetIsWeak()
-    {
-        return isWeak;
-    }
-
-    public bool GetIsMiddle()
-    {
-        return isMiddle;
-    }
-
-    public bool GetIsStrong()
-    {
-        return isStrong;
-    }
-
-    public bool GetIsJumpAttack()
-    {
-        return isJumpAttack;
-    }
 }
